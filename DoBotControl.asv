@@ -19,7 +19,7 @@ classdef DoBotControl
             self.GetJointState();
             self.GetCart();
             self.MoveCart(x,y,z);
-            self.CalcEEReqPose(startPos,startJS,endPos,rotTarget);
+            self.CalcEEReqRot(startPos,startJS,endPos,rotTarget);
             self.RotateEndEffector();
         end
     end
@@ -103,17 +103,16 @@ classdef DoBotControl
             fprintf('Moving to [%d,%d,%d]\n',x,y,z);
         end
 
-        function eeT = CalcEEReqPose(startPos,startJS,endPos,rotTarget)
+        function eeT = CalcEEReqRot(startPos,startJS,endPos,rotTarget)
             % CALCEEREQPOSE Calculate required final end effector pose
             % Based on the total rotation required and the value of
             % rotation achieved by the base, with consideration of initial
             % joint state
             
-            % Load the starting position (collection point)
-            startPos = [x0,y0,z0];
-
-            % Load the target position (deposition point)
-            endPos = [x1,y1,z1];
+            % Load values from inputs |||| Not needed??? Duplication???
+            % startPos = [x0,y0,z0];                                          % Starting position (collection point)
+            % endPos = [x1,y1,z1];                                            % Target position (deposition point)
+            % startJs = [base0,rear0,fore0,ee0];                              % Starting joint state (collection point)
 
             % Calculate radius of startPos
             startRad = sqrt(startPos(1)^2 + startPos(2)^2);
@@ -126,11 +125,17 @@ classdef DoBotControl
             deltaY = endPos(2) - startPos(2);
             deltaSE = sqrt(deltaX^2 + deltaY^2);
 
-            % Calculate angle inscribed by the base
-            rotBase = acos()
+            % Calculate angle inscribed by the base, using cosine rule
+            numerator = startRad^2 + endRad^2 - deltaSE^2;
+            denominator = 2 * startRad * endRad;
+            rotBase = acos(numerator/denominator);
+
+            % Calculate target end effector rotation
+            % EE rotation = final orientation - base rotation - initial EE rotation
+            eeT = rotTarget - rotBase - startJS(4);
         end
 
-        function [base,rearArm,foreArm,eeT] = RotateEndEffector(b,RA,FA,eeC)
+        function RotateEndEffector(base,rearArm,foreArm,eeT)
             % ROTATEENDEFFECTOR Return joint state for piece orientation
 
             jointTarget = [b,RA,FA,0];

@@ -19,7 +19,7 @@ classdef DoBotControl
             self.GetJointState();
             self.GetCart();
             self.MoveCart(x,y,z);
-            self.CalcEEReqPose(startPos,startJS,endPos,rotTarget);
+            self.CalcEEReqRot(startPos,startJS,endPos,rotTarget);
             self.RotateEndEffector();
         end
     end
@@ -103,16 +103,16 @@ classdef DoBotControl
             fprintf('Moving to [%d,%d,%d]\n',x,y,z);
         end
 
-        function eeT = CalcEEReqPose(startPos,startJS,endPos,rotTarget)
+        function eeT = CalcEEReqRot(startPos,startJS,endPos,rotTarget)
             % CALCEEREQPOSE Calculate required final end effector pose
             % Based on the total rotation required and the value of
             % rotation achieved by the base, with consideration of initial
             % joint state
             
-            % Load the values input
-            startPos = [x0,y0,z0];                                          % Starting position (collection point)
-            endPos = [x1,y1,z1];                                            % Target position (deposition point)
-            starJs = [base0,rear0,fore0,ee0]
+            % Load values from inputs |||| Not needed??? Duplication???
+            % startPos = [x0,y0,z0];                                          % Starting position (collection point)
+            % endPos = [x1,y1,z1];                                            % Target position (deposition point)
+            % startJs = [base0,rear0,fore0,ee0];                              % Starting joint state (collection point)
 
             % Calculate radius of startPos
             startRad = sqrt(startPos(1)^2 + startPos(2)^2);
@@ -129,19 +129,28 @@ classdef DoBotControl
             numerator = startRad^2 + endRad^2 - deltaSE^2;
             denominator = 2 * startRad * endRad;
             rotBase = acos(numerator/denominator);
+
+            % Calculate target end effector rotation
+            % EE rotation = final orientation - base rotation - initial EE rotation
+            eeT = rotTarget - rotBase - startJS(4);
         end
 
-        function [base,rearArm,foreArm,eeT] = RotateEndEffector(b,RA,FA,eeC)
+        function RotateEndEffector(base,rearArm,foreArm,eeT)
             % ROTATEENDEFFECTOR Return joint state for piece orientation
 
-            jointTarget = [b,RA,FA,0];
+            % Define the target joint state
+            jointTarget = [base,rearArm,foreArm,eeT];
 
+            % Initialise the target joint state publisher
             [targetJointTrajPub,targetJointTrajMsg] = rospublisher('/dobot_magician/target_joint_states');
             trajectoryPoint = rosmessage("trajectory_msgs/JointTrajectoryPoint");
             trajectoryPoint.Positions = jointTarget;
             targetJointTrajMsg.Points = trajectoryPoint;
             
+            % Send the target joint state via the publisher
             send(targetJointTrajPub,targetJointTrajMsg);
+            pause(2);
+            fprintf('Rotating end effector to %d\n',eeT);
         end
     end
 end
