@@ -47,20 +47,18 @@ classdef DoBotControl
 
             % Initialise subscriber to end effector pose
             endEffectorPose = rossubscriber('/dobot_magician/end_effector_poses');
-            pause(2);
-            currentEndEffectorPoseMsg = endEffectorPose.LatestMessage;
-
-            % Store position of the end effector
-            x = currentEndEffectorPoseMsg.Pose.Position.X;
-            y = currentEndEffectorPoseMsg.Pose.Position.Y;
-            z = currentEndEffectorPoseMsg.Pose.Position.Z;
-
-            % Store orientation of the end effector
-            % currentEndEffectorQuat = [currentEndEffectorPoseMsg.Pose.Orientation.W,
-            %                           currentEndEffectorPoseMsg.Pose.Orientation.X,
-            %                           currentEndEffectorPoseMsg.Pose.Orientation.Y,
-            %                           currentEndEffectorPoseMsg.Pose.Orientation.Z]
-            % Convert from quaternion to euler
+            pause(2); %Allow some time for MATLAB to start the subscriber
+            currentEndEffectorPoseMsg = endEffectorPose.LatestMessage
+            % Extract the position of the end effector from the received message
+            currentEndEffectorPosition = [currentEndEffectorPoseMsg.Pose.Position.X,
+                                          currentEndEffectorPoseMsg.Pose.Position.Y,
+                                          currentEndEffectorPoseMsg.Pose.Position.Z]
+            % Extract the orientation of the end effector
+            currentEndEffectorQuat = [currentEndEffectorPoseMsg.Pose.Orientation.W,
+                                      currentEndEffectorPoseMsg.Pose.Orientation.X,
+                                      currentEndEffectorPoseMsg.Pose.Orientation.Y,
+                                      currentEndEffectorPoseMsg.Pose.Orientation.Z]
+            % Convert from quaternion to euler | Commented out as Quat was 1,0,0,0
             % [roll,pitch,yaw] = quat2eul(currentEndEffectorQuat);
         end
         
@@ -102,17 +100,8 @@ classdef DoBotControl
             fprintf('Moving to [%d,%d,%d]\n',x,y,z);
         end
 
-        function [base,rearArm,foreArm,eeT] = RotateEndEffector(b,RA,FA,eeC)
+        function [base,rearArm,foreArm,ee] = RotateEndEffector()
             % ROTATEENDEFFECTOR Return joint state for piece orientation
-
-            jointTarget = [b,RA,FA,0];
-
-            [targetJointTrajPub,targetJointTrajMsg] = rospublisher('/dobot_magician/target_joint_states');
-            trajectoryPoint = rosmessage("trajectory_msgs/JointTrajectoryPoint");
-            trajectoryPoint.Positions = jointTarget;
-            targetJointTrajMsg.Points = trajectoryPoint;
-            
-            send(targetJointTrajPub,targetJointTrajMsg);
         end
     end
 end

@@ -23,7 +23,7 @@ classdef EndEffectorControl
             % TOOLSTATE Check the tool state
             % Called to identify whether suction is on or off
 
-            % Define the subscriber and output
+            % Initialise the subscriber and output
             toolStateSubscriber = rossubscriber('/dobot_magician/tool_state');
             pause(2);
             currentToolState = toolStateSubscriber.LatestMessage.Data;
@@ -32,8 +32,9 @@ classdef EndEffectorControl
         function On()
             % ON Function to turn the suction end effector on
             
-            % Check tool state
+            % Check tool state and print to terminal
             currentToolState = ToolState();
+            fprintf('Current suction state: %d\n',currentToolState);
 
             % If tool is already on, break
             while currentToolState == 1
@@ -52,14 +53,15 @@ classdef EndEffectorControl
             currentToolState = ToolState();
 
             % Print confirmation to terminal
-            fprintf('Suction state: %d\n',currentToolState);
+            fprintf('New suction state: %d\n',currentToolState);
         end
 
         function Off()
             % OFF Function to turn the suction end effector on
             
-            % Check tool state
+            % Check tool state and print to terminal
             currentToolState = ToolState();
+            fprintf('Current suction state: %d\n',currentToolState);
 
             % If tool is already off, break
             while currentToolState ~= 1
@@ -78,7 +80,7 @@ classdef EndEffectorControl
             currentToolState = ToolState();
 
             % Print confirmation to terminal
-            fprintf('Suction state: %d\n',currentToolState);
+            fprintf('New suction state: %d\n',currentToolState);
         end
     end
 end
