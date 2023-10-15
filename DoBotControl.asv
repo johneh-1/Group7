@@ -19,6 +19,7 @@ classdef DoBotControl
             self.GetJointState();
             self.GetCart();
             self.MoveCart(x,y,z);
+            self.CalcEEReqPose(startPos,startJS,endPos,rotTarget);
             self.RotateEndEffector();
         end
     end
@@ -47,18 +48,20 @@ classdef DoBotControl
 
             % Initialise subscriber to end effector pose
             endEffectorPose = rossubscriber('/dobot_magician/end_effector_poses');
-            pause(2); %Allow some time for MATLAB to start the subscriber
-            currentEndEffectorPoseMsg = endEffectorPose.LatestMessage
-            % Extract the position of the end effector from the received message
-            currentEndEffectorPosition = [currentEndEffectorPoseMsg.Pose.Position.X,
-                                          currentEndEffectorPoseMsg.Pose.Position.Y,
-                                          currentEndEffectorPoseMsg.Pose.Position.Z]
-            % Extract the orientation of the end effector
-            currentEndEffectorQuat = [currentEndEffectorPoseMsg.Pose.Orientation.W,
-                                      currentEndEffectorPoseMsg.Pose.Orientation.X,
-                                      currentEndEffectorPoseMsg.Pose.Orientation.Y,
-                                      currentEndEffectorPoseMsg.Pose.Orientation.Z]
-            % Convert from quaternion to euler | Commented out as Quat was 1,0,0,0
+            pause(2);
+            currentEndEffectorPoseMsg = endEffectorPose.LatestMessage;
+
+            % Store position of the end effector
+            x = currentEndEffectorPoseMsg.Pose.Position.X;
+            y = currentEndEffectorPoseMsg.Pose.Position.Y;
+            z = currentEndEffectorPoseMsg.Pose.Position.Z;
+
+            % Store orientation of the end effector
+            % currentEndEffectorQuat = [currentEndEffectorPoseMsg.Pose.Orientation.W,
+            %                           currentEndEffectorPoseMsg.Pose.Orientation.X,
+            %                           currentEndEffectorPoseMsg.Pose.Orientation.Y,
+            %                           currentEndEffectorPoseMsg.Pose.Orientation.Z]
+            % Convert from quaternion to euler
             % [roll,pitch,yaw] = quat2eul(currentEndEffectorQuat);
         end
         
@@ -100,8 +103,44 @@ classdef DoBotControl
             fprintf('Moving to [%d,%d,%d]\n',x,y,z);
         end
 
-        function [base,rearArm,foreArm,ee] = RotateEndEffector()
+        function eeT = CalcEEReqPose(startPos,startJS,endPos,rotTarget)
+            % CALCEEREQPOSE Calculate required final end effector pose
+            % Based on the total rotation required and the value of
+            % rotation achieved by the base, with consideration of initial
+            % joint state
+            
+            % Load the starting position (collection point)
+            startPos = [x0,y0,z0];
+
+            % Load the target position (deposition point)
+            endPos = [x1,y1,z1];
+
+            % Calculate radius of startPos
+            startRad = sqrt(startPos(1)^2 + startPos(2)^2);
+
+            % Calculate radius of endPos
+            endRad = sqrt(endPos(1)^2+endPos(2)^2);
+
+            % Calculate distance between startPos and endPos
+            deltaX = endPos(1) - startPos(1);
+            deltaY = endPos(2) - startPos(2);
+            deltaSE = sqrt(deltaX^2 + deltaY^2);
+
+            % Calculate angle inscribed by the base
+            rotBase = acos()
+        end
+
+        function [base,rearArm,foreArm,eeT] = RotateEndEffector(b,RA,FA,eeC)
             % ROTATEENDEFFECTOR Return joint state for piece orientation
+
+            jointTarget = [b,RA,FA,0];
+
+            [targetJointTrajPub,targetJointTrajMsg] = rospublisher('/dobot_magician/target_joint_states');
+            trajectoryPoint = rosmessage("trajectory_msgs/JointTrajectoryPoint");
+            trajectoryPoint.Positions = jointTarget;
+            targetJointTrajMsg.Points = trajectoryPoint;
+            
+            send(targetJointTrajPub,targetJointTrajMsg);
         end
     end
 end

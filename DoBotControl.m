@@ -19,6 +19,7 @@ classdef DoBotControl
             self.GetJointState();
             self.GetCart();
             self.MoveCart(x,y,z);
+            self.CalcEEReqPose(startPos,startJS,endPos,rotTarget);
             self.RotateEndEffector();
         end
     end
@@ -100,6 +101,34 @@ classdef DoBotControl
             send(targetEndEffectorPub,targetEndEffectorMsg)
             pause(2);
             fprintf('Moving to [%d,%d,%d]\n',x,y,z);
+        end
+
+        function eeT = CalcEEReqPose(startPos,startJS,endPos,rotTarget)
+            % CALCEEREQPOSE Calculate required final end effector pose
+            % Based on the total rotation required and the value of
+            % rotation achieved by the base, with consideration of initial
+            % joint state
+            
+            % Load the values input
+            startPos = [x0,y0,z0];                                          % Starting position (collection point)
+            endPos = [x1,y1,z1];                                            % Target position (deposition point)
+            starJs = [base0,rear0,fore0,ee0]
+
+            % Calculate radius of startPos
+            startRad = sqrt(startPos(1)^2 + startPos(2)^2);
+
+            % Calculate radius of endPos
+            endRad = sqrt(endPos(1)^2+endPos(2)^2);
+
+            % Calculate distance between startPos and endPos
+            deltaX = endPos(1) - startPos(1);
+            deltaY = endPos(2) - startPos(2);
+            deltaSE = sqrt(deltaX^2 + deltaY^2);
+
+            % Calculate angle inscribed by the base, using cosine rule
+            numerator = startRad^2 + endRad^2 - deltaSE^2;
+            denominator = 2 * startRad * endRad;
+            rotBase = acos(numerator/denominator);
         end
 
         function [base,rearArm,foreArm,eeT] = RotateEndEffector(b,RA,FA,eeC)
