@@ -5,7 +5,14 @@ classdef camera2Dobot < handle
     properties (Constant)
         % Properties of camera (Intel RealSense D435i, mounted 330mm above
         % desk)
-        xCameraOffset = 0.330;                                              % Mounted 3300mm
+        cameraVertOffset = 0.330;                                           % Mounted 330mm (0.330m) above desk
+        cameraXOffset = 0;                                                  % Mounted on y-axis of DoBot frame
+        cameraYOffset = 0.200;                                              % Mounted 200mm (0.200m) along y-axis of DoBot frame
+        % Horizontal FOV
+        % Vertical FOV
+
+        % Properties of DoBot
+        doBotVertOffset = -0.0693;                                          % End off suction end effector sits 69.3mm (0.0693m) below DoBot vertical 0 when flat on desk
 
     end
 
@@ -60,7 +67,9 @@ classdef camera2Dobot < handle
                 % [OUT] yD = y-coordinate in DoBot's frame
                 % [OUT] zD = z-coordinate in DoBot's frame
 
+           % Get the point in the camera's frame
            [xC,yC,zC] = GetCameraPoint(1);
+           xD = zC + 
         end
     end
 end

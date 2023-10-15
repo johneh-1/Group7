@@ -5,12 +5,14 @@ classdef camera2Dobot < handle
     properties (Constant)
         % Properties of camera (Intel RealSense D435i, mounted 330mm above
         % desk)
-        CameraVertOffset = 0.330;                                              % Mounted 330mm (0.330m) above desk
+        cameraVertOffset = 0.330;                                           % Mounted 330mm (0.330m) above desk
+        cameraXOffset = 0;                                                  % Mounted on y-axis of DoBot frame
+        cameraYOffset = -0.200;                                             % Mounted 200mm (0.200m) along y-axis of DoBot frame
         % Horizontal FOV
         % Vertical FOV
 
         % Properties of DoBot
-        DoBotVertOffset = -0.0693;                                          % End off suction end effector sits 69.3mm (0.0693m) below DoBot vertical 0 when flat on desk
+        doBotVertOffset = -0.0693;                                          % End off suction end effector sits 69.3mm (0.0693m) below DoBot vertical 0 when flat on desk
 
     end
 
@@ -23,7 +25,7 @@ classdef camera2Dobot < handle
             % CAMERA2DOBOT Define all functions required in the class
             %   Detailed explanation goes here
             self.GetCameraPoint(type);
-            self.Convert(xC,yC,zC);
+            self.Convert(type);
         end
     end
 
@@ -43,13 +45,18 @@ classdef camera2Dobot < handle
             
             switch type
                 case 1
+                    % Clicked point
                     % Subscribe to /clicked_point topic
                     
                     % Extract values from topic
+                case 2
+                    % Detected object
+                    % Get object coordinates
+                        % From function developed by Alex
             end
         end
 
-        function [xD,yD,zD] = Convert(xC,yC,zC)
+        function [xD,yD,zD] = Convert(type)
             % CONVERT Function to convert from camera's frame to DoBot's
             % frame (Cartesian)
             % Points sourced from the camera are taken in and converted to
@@ -65,7 +72,17 @@ classdef camera2Dobot < handle
                 % [OUT] yD = y-coordinate in DoBot's frame
                 % [OUT] zD = z-coordinate in DoBot's frame
 
-           [xC,yC,zC] = GetCameraPoint(1);
+           % Get the point in the camera's frame
+           [xC,yC,zC] = GetCameraPoint(type);
+
+           % Convert to get x-coordinate
+           xD = zC + camera2Dobot.cameraXOffset;
+
+           % Convert to get y-coordinate
+           yD = yC + camera2Dobot.cameraYOffset;
+
+           % Convert to get z-coordinate
+           zD = xC + camera2Dobot.cameraVertOffset;
         end
     end
 end
