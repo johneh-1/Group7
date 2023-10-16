@@ -44,7 +44,7 @@ classdef EndEffectorControl
             % If tool is not on, turn suction on
             while currentToolState ~= 1
                 [toolStatePub, toolStateMsg] = rospublisher('/dobot_magician/target_tool_state');
-                toolStateMsg.Data = [1];
+                toolStateMsg.Data = [1 0];
                 send(toolStatePub,toolStateMsg);
                 break
             end
@@ -61,21 +61,21 @@ classdef EndEffectorControl
             % OFF Function to turn the suction end effector on
             
             % Check tool state and print to terminal
-            currentToolState = EndEffectorControl.ToolState();
-            fprintf('Current suction state: %d\n',currentToolState);
-
-            % If tool is already off, break
-            while currentToolState ~= 1
-                break
-            end
-
-            % If tool is not on, turn suction on
-            while currentToolState == 1
+            % currentToolState = EndEffectorControl.ToolState();
+            % fprintf('Current suction state: %d\n',currentToolState);
+            % 
+            % % If tool is already off, break
+            % while currentToolState ~= 1
+            %     break
+            % end
+            % 
+            % % If tool is not on, turn suction on
+            % while currentToolState == 1
                 [toolStatePub, toolStateMsg] = rospublisher('/dobot_magician/target_tool_state');
-                toolStateMsg.Data = [0];
-                send(toolStatePub,toolStateMsg);
-                break
-            end
+toolStateMsg.Data = [1 1];
+send(toolStatePub,toolStateMsg);
+            %     break
+            % end
 
             pause(2);
             % Check tool state to confirm success
