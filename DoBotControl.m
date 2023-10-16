@@ -20,7 +20,7 @@ classdef DoBotControl
             self.GetCart();
             self.MoveCart(x,y,z);
             self.CalcEEReqRot(startPos,startJS,endPos,rotTarget);
-            self.RotateEndEffector();
+            self.RotateEndEffector(base,rearArm,foreArm,eeT);
         end
     end
 
@@ -40,7 +40,7 @@ classdef DoBotControl
             ee = currentJointState(4);
 
             % Print to terminal
-            fprintf('Current joint states are [%d,%d,%d,%d',base,rearArm,foreArm,ee);
+            fprintf('Current joint states are [%d,%d,%d,%d]',base,rearArm,foreArm,ee);
         end
         
         function [x,y,z] = GetCart()
