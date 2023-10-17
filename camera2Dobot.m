@@ -16,8 +16,9 @@ classdef camera2Dobot < handle
 
     end
 
-    properties
+    properties (Access = public)
         % Other properties
+        % point = [];
     end
     
     methods
@@ -26,7 +27,12 @@ classdef camera2Dobot < handle
             %   Detailed explanation goes here
             self.GetCameraPoint(type);
             self.Convert(type);
+            self.pointCallback(self,src,message);
         end
+
+        % function pointCallback(self,src,message)
+        %     self.point = [message.Point.X,message.Point.Y,message.Point.Z];
+        % end
     end
 
     methods (Static) 
@@ -48,12 +54,14 @@ classdef camera2Dobot < handle
                     % Clicked point
                     % Subscribe to /clicked_point topic
                     pointSub = rossubscriber('/clicked_point');
-                    
+
                     % Extract values from topic
                     point = pointSub.LatestMessage.Point;
                     xC = point.X;
                     yC = point.Y;
                     zC = point.Z;
+
+                    % pointSub = rossubscriber('/clicked_point',camera2Dobot.pointCallback);
                 case 2
                     % Detected object
                     % Get object coordinates
@@ -89,6 +97,10 @@ classdef camera2Dobot < handle
            % Convert to get z-coordinate
            zD = xC + camera2Dobot.cameraVertOffset;
         end
+
+        % function pointCallback(self,src,message)
+        %     camera2Dobot.point = [message.Point.X,message.Point.Y,message.Point.Z];
+        % end
     end
 end
 

@@ -7,7 +7,7 @@ classdef DoBotControl
         % cartService = rossvcclient('/dobot/cartesian');                     % Service to control Cartesian coordinates of robot
     end
 
-    properties
+    properties (Access = public)
         % jointSubStatus = 0;                                                 % Status of joint state subscriber intialisation
         % jointSrvStatus = 0;                                                 % Status of joint state service initialisation
         % cartSrvStatus = 0;                                                  % Status of Cartesian service initialisation
