@@ -47,8 +47,13 @@ classdef camera2Dobot < handle
                 case 1
                     % Clicked point
                     % Subscribe to /clicked_point topic
+                    pointSub = rossubscriber('/clicked_point');
                     
                     % Extract values from topic
+                    point = pointSub.LatestMessage.Point;
+                    xC = point.X;
+                    yC = point.Y;
+                    zC = point.Z;
                 case 2
                     % Detected object
                     % Get object coordinates
@@ -73,7 +78,7 @@ classdef camera2Dobot < handle
                 % [OUT] zD = z-coordinate in DoBot's frame
 
            % Get the point in the camera's frame
-           [xC,yC,zC] = GetCameraPoint(type);
+           [xC,yC,zC] = camera2Dobot.GetCameraPoint(type);
 
            % Convert to get x-coordinate
            xD = zC + camera2Dobot.cameraXOffset;
