@@ -17,10 +17,17 @@ rosinit;
     % @NOTE: Other specific subscribers are initialised within functions
 rgbSub = rossubscriber('/camera/color/image_raw');                          % RGB stream subscriber
 pointsSub = rossubscriber('/camera/depth_registered/points');               % Depth points stream subscriber
-%% Detect objects within initial environment state
+
+% Define point on top of target box, in camera's frame
+boxX = 0;
+boxY = 0;
+%% Detect targets in box within initial environment state
 % Load current RGB image and store as the reference
 reference = readImage(rgbSub.LatestMessage);
 reference = rgb2gray(reference);
+if isempty(reference)
+    fprintf('Reference image failed to load! Term');
+pfrintf('Reference image loaded');
 
 % Store recognised objects from the box
     % @NOTE: 
@@ -29,12 +36,20 @@ reference = rgb2gray(reference);
     % Object 3 = diamond
     % Object 4 = triangle
     % Object 5 = circle
-objects = imageProcessing.ObjectRecognition(reference);
+targets = imageProcessing.ObjectRecognition(reference);
 
 % User to randomly place pieces in environment
 fprintf('Please place the pieces\n');
+pause(1);
 fprintf('Press enter to continue\n');
 pause
+%% Detect pieces in environment
+% Get current RGB image
+image = readImage(rgbSub.LatestMessage);
+image = rgb2gray(image);
+
+% Store recognised objects
+objects = imageProcessing.ObjectRecognition(image);
 %% Pick and place objects
 % Iterate through objects
 for i=1:size(objects,1)
@@ -48,6 +63,7 @@ for i=1:size(objects,1)
 
     % Identify the starting location of the piece
     [xC,yC] = objects(i,:);
+    % Brayden's conversion function for xC,yC into distances
     pointMsg = pointsSub.LatestMessage;
     pointMsg.PreserveStructureOnRead = true;
     depthPoints = readXYZ(pointMsg);
@@ -56,6 +72,51 @@ for i=1:size(objects,1)
     sumZ = sum(z);
     sizeZ = size(z,2);
     zC = sumZ/sizeZ;
-    [xD,yD,zD] = Convert(xC,yC,zC);
-    DoBotControl.MoveCart
+    [xD,yD,zD] = camera2Dobot.Convert(xC,yC,zC);
+
+    % Move and collect piece
+    DoBotControl.MoveCart(xD,yD,zD+0.025,0,0,0);
+    pause(1);
+    DoBotControl.MoveCart(xD,yD,zD,0,0,0);
+    pause(1);
+    EndEffectorControl.On();
+    pause(1);
+        % Get joint state
+    [base,rearArm,foreArm,ee] = DoBotControl.GetJointState();
+    pause(1);
+    DoBotControl.MoveCart(xD,yD,zD+0.025,0,0,0);
+    pause(1);
+
+    % Identify the target location of the piece
+    [xCT,yCT] = targets(i,:);
+    % Brayden's conversion function for xC,yC into distances
+    pointMsgT = pointsSub.LatestMessage;
+    pointMsgT.PreserveStructureOnRead = true;
+    depthPointsT = readXYZ(pointMsgT);
+    zPointsT = depthPointsT(:,:,3);
+    zCT = zPointsT(boxX,boxY);
+    % sumZT = sum(zT);
+    % sizeZT = size(zT,2);
+    % zCT = sumZT/sizeZT;
+    [xDT,yDT,zDT] = camera2Dobot.Convert(xCT,yCT,zCT);
+
+    % Move and deposit piece
+        % Move to 25mm above target
+    DoBotControl.MoveCart(xDT,yDT,zDT+0.025,0,0,0);
+    pause(1);
+        % Calculate alignment of piece
+    eeT = DoBotControl.CalcEEReqRot([xD,yD,zD],[base,rearArm,foreArm,ee],[xDT,yDT,zDT],theta);
+    [base,rearArm,foreArm,ee] = DoBotControl.GetJointState();
+    pause(1);
+        % Rotate end effector to align piece to target
+    DoBotControl.RotateEndEffector(base,rearArm,foreArm,eeT);
+    pause(1);
+        % Place piece
+    DoBotControl.MoveCart(xD,yD,zD,0,0,0);
+    pause(1);
+    EndEffectorControl.Off();
+    pause(1);
+        % Move to 25mm above target
+    DoBotControl.MoveCart(xD,yD,zD+0.025,0,0,0);
+    pause(1);
 end
