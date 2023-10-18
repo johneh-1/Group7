@@ -1,70 +1,61 @@
-%% Script of execution
-%% Notes for DoBot
-% 1. Get target xyz for collection
-% 2. Move to target xyz for collection + 25mm above piece
-% 3. Lower EE to target xyz to sit on piece
-% 4. Turn on suction
-% 5. Raise EE by 25mm from current xyz (current state, z=z+0.025)
-% 6. Invert transform between positions to find transformation matrix
-% required for end effector to move
-% 7. Convert (6) into an xyz coordinate
-% 8. Get current joint states (incl. EE)
-% 9. Compute final required EE orientation, subtract movement to be made by
-% base
-    % 9.1 This may require trigonometry to calcualte angle transcribed by
-    % base during movement
-    % 9.2 Subtract (9.1) from (9), this produces final EE joint state
-% 10. Send target xyz + 25mm for deposition
-% 11. At 25mm above target point, send required EE joint state. Other
-% joints to remain at current state
-% 12. Lower EE to target xyz to deposit piece
-% 13. Turn off suction
+%% Script for execution
+% This script for execution controls the pick and place movement of the
+% DoBot Magician, guided by the Intel RealSense D435i.
+    % @NOTE: Camera calibration is separate to this script and is a
+    % requirement to be undertaken prior to running this script.
+%% Initialisation
+% Initialise ROS
+rosinit;
 
-%% Execution test for pick and place
-DoBotControl.MoveCart(-0.0119,-0.2762,0,0,0,0);
-pause(1);
-DoBotControl.MoveCart(-0.0119,-0.2762,-0.0490,0,0,0);
-pause(1);
-EndEffectorControl.On();
-pause(1);
-DoBotControl.MoveCart(-0.0119,-0.2762,0,0,0,0);
-pause(1);
-DoBotControl.MoveCart(0.1100,-0.2050,0.0295,0,0,0);
-pause(1);
-[base,rearArm,foreArm,ee] = DoBotControl.GetJointState();
-pause(1);
-DoBotControl.RotateEndEffector(base,rearArm,foreArm,ee+pi/4);
-pause(1);
-[base,rearArm,foreArm,ee] = DoBotControl.GetJointState();
-pause(1);
-DoBotControl.MoveCart(0.1100,-0.2050,0.0055,0,0,ee);
-pause(1);
-EndEffectorControl.Off();
-pause(1);
-DoBotControl.MoveCart(0.1100,-0.2050,0.0295,0,0,ee);
-pause(1);
-DoBotControl.MoveCart(0,-0.2,0.05,0,0,0);
-%% Execution test with object recognition
-% find average value of each point
+% Launch DoBot driver through terminal
+    % roslaunch dobot_magician_driver dobot_magician.launch
 
-% Image processing
-% Subscribers
-rgbSub = rossubscriber('/camera/color/image_raw');
-pointsSub = rossubscriber('/camera/depth_registered/points');
+% Launch RealSense driver through terminal
+    % roslaunch realsense2_camera rs_rgbd.launch
 
-% RGB
-img = readImage(rgbSub.LatestMessage);
-img = rgb2gray(img);
-points = detectHarrisFeatures(img,'MinQuality',0.1);
+% Initialise subscribers
+    % @NOTE: Other specific subscribers are initialised within functions
+rgbSub = rossubscriber('/camera/color/image_raw');                          % RGB stream subscriber
+pointsSub = rossubscriber('/camera/depth_registered/points');               % Depth points stream subscriber
+%% Detect objects within initial environment state
+% Load current RGB image and store as the reference
+reference = readImage(rgbSub.LatestMessage);
+reference = rgb2gray(reference);
 
-% Calculate location, using the output of the last 3 points as vertices
-% X = sum(points.Location(8,1)+points.Location(9,1)+points.Location(10,1));
-% X = X/3;
-% Y = sum(points.Location(8,2)+points.Location(9,2)+points.Location(10,2));
-% Y = Y/3;
+% Store recognised objects from the box
+    % @NOTE: 
+    % Object 1 = square
+    % Object 2 = rectangle
+    % Object 3 = diamond
+    % Object 4 = triangle
+    % Object 5 = circle
+objects = imageProcessing.ObjectRecognition(reference);
 
-% Depth
-pointMsg = pointsSub.LatestMessage;
-pointMsg.PreserveStructureOnRead = true;
-depthPoints = readXYZ(pointMsg);
-z = depthPoints(:,:,3)
+% User to randomly place pieces in environment
+fprintf('Please place the pieces\n');
+fprintf('Press enter to continue\n');
+pause
+%% Pick and place objects
+% Iterate through objects
+for i=1:size(objects,1)
+    % Get current RGB image
+    img = readImage(rgbSub.LatestMessage);
+    img = rgb2gray(img);
+
+    % Calculate the rotation transform
+    [matchedPoints,matchedPointsReference] = imageProcessing.MatchFeatures(img,reference);
+    theta = imageProcessing.CalcTransform(matchedPoints,matchedPointsReference);
+
+    % Identify the starting location of the piece
+    [xC,yC] = objects(i,:);
+    pointMsg = pointsSub.LatestMessage;
+    pointMsg.PreserveStructureOnRead = true;
+    depthPoints = readXYZ(pointMsg);
+    zPoints = depthPoints(:,:,3);
+    z = zPoints(320,:);
+    sumZ = sum(z);
+    sizeZ = size(z,2);
+    zC = sumZ/sizeZ;
+    [xD,yD,zD] = Convert(xC,yC,zC);
+    DoBotControl.MoveCart
+end

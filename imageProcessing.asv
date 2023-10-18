@@ -11,8 +11,7 @@ classdef imageProcessing < handle
             %IMAGEPROCESSING Construct an instance of this class
             %   Detailed explanation goes here
             self.ObjectRecognition(img);
-            self.MatchFeatures(img,reference);
-            self.CalcTransform(matchedPoints,matchedPointsReference);
+            self.CalcTransform();
         end
     end
     methods (Static)
@@ -25,31 +24,7 @@ classdef imageProcessing < handle
             objects = [];
         end
 
-        function [matchedPoints,matchedPointsReference] = MatchFeatures(img,reference)
-            % MATCHFEATURES Feature matching function using SURF algorithm
-            % Parameters:
-                % [IN] img = current image
-                % [IN] reference = reference image
-                % [OUT] matchedPoints = matched points in current image
-                % [OUT] matchePointsReference = matched points in reference
-            
-            % Use SURF algorithm to detect features and store
-            points = detectSURFFeatures(img);
-            pointsRef = detectSURFFeatures(reference);
-
-            % Extract features
-            [features1, validPoints1] = extractFeatures(img,points);
-            [features2, validPoints2] = extractFeatures(reference,pointsRef);
-
-            % Index pairs
-            indexPairs = matchFeatures(features1,features2);
-
-            % Store matched points based on the index
-            matchedPoints = validPoints1(indexPairs(:,1));
-            matchedPointsReference = validPoints2(indexPairs(:,2));
-        end
-
-        function theta = CalcTransform(matchedPoints,matchedPointsReference)
+        function theta CalcTransform(matchedPoints,matchedPointsReference)
 
             [tform,inlier,inlierReference] = estimateGeometricTransform(matchedPoints,matchedPointsReference,'similarity');
 
@@ -57,7 +32,7 @@ classdef imageProcessing < handle
             ss = Tinv(2,1);
             sc = Tinv(1,1);
             scale = sqrt(ss*ss + sc*sc);
-            theta = atan2(ss,sc)*180/pi;
+            theta = atan2(ss,sc)*180/pi
 
             % NOTE: ThetaRecovered is the rotation between images. This is
             % what ultimately needs to be input to the end effector pose
