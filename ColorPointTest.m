@@ -1,7 +1,7 @@
 function ColorPointTest()
 close all;
-rgbSub = rossubscriber('/camera/rgb/image_color');
-pointsSub = rossubscriber('/camera/depth/points');
+rgbSub = rossubscriber('/camera/aligned_depth_to_color/image_raw');
+pointsSub = rossubscriber('/camera/depth_registered/points');
 pause(5); 
 
 % Get the first message and plot the non coloured data
@@ -24,12 +24,27 @@ while 1
     x = cloud(:,:,1);
     y = cloud(:,:,2);
     z = cloud(:,:,3);
-    r = img(:,:,1);
-    g = img(:,:,2);
-    b = img(:,:,3);
+    % r = img(:,:,1);
+    % g = img(:,:,2);
+    % b = img(:,:,3);
     
     % Update the plot
-    set(cloudPlot_h,'CData',[r(:),g(:),b(:)]);
+    % set(cloudPlot_h,'CData',[r(:),g(:),b(:)]);
     set(cloudPlot_h,'XData',x(:),'YData',y(:),'ZData',z(:));
     drawnow();
 end
+
+% NOTES:
+% z is 480x640
+% zSample = z(:,240) is a strip across the middle of the page
+% sumZ = sum(zSample)
+% sizeZs = size(zSample,1)
+% aveZ = sumZ/sizeZs
+    % Example: aveZ = 0.3151
+
+%% Show video
+rgbSub = rossubscriber('/camera/color/image_raw');
+img = readImage(rgbSub.LatestMessage);
+imshow(img)
+
+rgbSub = rossubscriber('/camera/color/image_raw');
