@@ -95,7 +95,7 @@ classdef camera2Dobot < handle
            xD = (zC)/1000 + camera2Dobot.cameraXOffset;
 
            % Convert to get y-coordinate
-           yD = -1*((yC)/1000 + camera2Dobot.cameraYOffset);
+           yD = -1*(yC)/1000 + camera2Dobot.cameraYOffset;
 
            % Convert to get z-coordinate
            zD = (xC)/1000 + camera2Dobot.cameraVertOffset + camera2Dobot.eeLength;

@@ -60,23 +60,11 @@ points = detectHarrisFeatures(img,'MinQuality',0.1);
 % Calculate location, using the output of the last 3 points as vertices
 % X = sum(points.Location(8,1)+points.Location(9,1)+points.Location(10,1));
 % X = X/3;
-x = 458.2235;
 % Y = sum(points.Location(8,2)+points.Location(9,2)+points.Location(10,2));
 % Y = Y/3;
-y = 248.2973;
 
 % Depth
 pointMsg = pointsSub.LatestMessage;
 pointMsg.PreserveStructureOnRead = true;
 depthPoints = readXYZ(pointMsg);
-zPoints = depthPoints(:,:,3);
-z = zPoints(320,:);
-sumZ = sum(z);
-sizeZ = size(z,2);
-aveZ = sumZ/sizeZ;
-
-% Target point for collection
-% xC,yC,aveZ
-
-% Convert camera to DoBot
-[xD,yD,zD] = camera2Dobot.Convert(x,y,aveZ);
+z = depthPoints(:,:,3)
