@@ -5,7 +5,7 @@
     % requirement to be undertaken prior to running this script.
 %% Initialisation
 % Initialise ROS
-rosinit;
+% rosinit;
 
 % Launch DoBot driver through terminal
     % roslaunch dobot_magician_driver dobot_magician.launch
@@ -21,6 +21,9 @@ pointsSub = rossubscriber('/camera/depth_registered/points');               % De
 % Define point on top of target box, in camera's frame
 boxX = 0;
 boxY = 0;
+
+% Move DoBot to side of workspace
+DoBotControl.MoveCart(0.15,0,0,0,0,0);
 %% Detect targets in box within initial environment state
 % Load current RGB image and store as the reference
 reference = readImage(rgbSub.LatestMessage);
@@ -29,7 +32,7 @@ if isempty(reference)
     fprintf('Reference image failed to load! Terminating\n');
     return
 else
-    fprintf('Reference image loaded');
+    fprintf('Reference image loaded\n');
 end
 
 % Store recognised objects from the box
@@ -40,7 +43,7 @@ end
     % Object 4 = triangle
     % Object 5 = circle
 targets = imageProcessing.ObjectRecognition(reference);
-fprintf('%d targets loaded!',size(targets,1));
+fprintf('%d targets loaded!\n',size(targets,1));
 
 % User to randomly place pieces in environment
 fprintf('Please place the pieces\n');
@@ -55,12 +58,12 @@ if isempty(image)
     fprintf('Piece detection image failed to load! Terminating\n');
     return
 else
-    fprintf('Piece detection image loaded');
+    fprintf('Piece detection image loaded\n');
 end
 
 % Store recognised objects
 objects = imageProcessing.ObjectRecognition(image);
-fprintf('%d objects loaded!',size(objects,1));
+fprintf('%d objects loaded!\n',size(objects,1));
 %% Pick and place objects
 % Iterate through objects
 for i=1:size(objects,1)

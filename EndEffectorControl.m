@@ -60,7 +60,7 @@ classdef EndEffectorControl
         function Off()
             % OFF Function to turn the suction end effector on
             
-            Check tool state and print to terminal
+            % Check tool state and print to terminal
             currentToolState = EndEffectorControl.ToolState();
             fprintf('Current suction state: %d\n',currentToolState);
 
