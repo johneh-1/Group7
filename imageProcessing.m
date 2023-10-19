@@ -23,10 +23,8 @@ classdef imageProcessing < handle
                 % [OUT] objects = array of objects
             % From Alex
             points = detectHarrisFeatures(img,"MinQuality",0.1);
-            
-            % x_coordinate that seperates reference image and whole image
 
-            % n = ???
+            % n = ??? Value that seperates reference image from whole image
 
             image_type = type;
 
@@ -43,64 +41,66 @@ classdef imageProcessing < handle
             end
             
             % Determine shapes by finding points close to each other
-            shape = object;
+            
 
             % m = ??? Distance between each point
 
-            switch object
-                case square
-                    for [x,y] = stored_points
-                           distance = [x+1,y+1] - [x,y]
-                           if distance < m
-                               points_of_shape = []
-                               points_of_shape.append([x,y]) 
-                           end
-                           polyin = polyshape(points_of_shape);
-                    end
-
-                case rectangle
-                    for [x,y] = stored_points
-                           distance = [x+1,y+1] - [x,y]
-                           if distance < m
-                               points_of_shape = []
-                               points_of_shape.append([x,y]) 
-                           end
-                           polyin = polyshape(points_of_shape);
-                    end
-
-                case diamond
-                    for [x,y] = stored_points
-                           distance = [x+1,y+1] - [x,y]
-                           if distance < m
-                               points_of_shape = []
-                               points_of_shape.append([x,y]) 
-                           end
-                           polyin = polyshape(points_of_shape);
-                    end
-
-                case triangle
-                    for [x,y] = stored_points
-                           distance = [x+1,y+1] - [x,y]
-                           if distance < m
-                               points_of_shape = []
-                               points_of_shape.append([x,y]) 
-                           end
-                           polyin = polyshape(points_of_shape);
-                    end
-
-                % ignore circle for now
-                % case circle
-                %     for [x,y] = stored_points
-                %            distance = [x+1,y+1] - [x,y]
-                %            if distance < m
-                %                points_of_shape = []
-                %                points_of_shape.append([x,y]) 
-                %            end
-                %            polyin = polyshape(points_of_shape);
-                %     end
-
-                otherwise
-                    printf("This ain't a shape!");
+            for shape = square, rectangle, diamond, triangle
+                switch shape
+                    case square
+                        for [x,y] = stored_points
+                               distance = [x+1,y+1] - [x,y]
+                               if distance < m
+                                   points_of_shape = []
+                                   points_of_shape.append([x,y]) 
+                               end
+                               polyin = polyshape(points_of_shape);
+                        end
+    
+                    case rectangle
+                        for [x,y] = stored_points
+                               distance = [x+1,y+1] - [x,y]
+                               if distance < m
+                                   points_of_shape = []
+                                   points_of_shape.append([x,y]) 
+                               end
+                               polyin = polyshape(points_of_shape);
+                        end
+    
+                    case diamond
+                        for [x,y] = stored_points
+                               distance = [x+1,y+1] - [x,y]
+                               if distance < m
+                                   points_of_shape = []
+                                   points_of_shape.append([x,y]) 
+                               end
+                               polyin = polyshape(points_of_shape);
+                        end
+    
+                    case triangle
+                        for [x,y] = stored_points
+                               distance = [x+1,y+1] - [x,y]
+                               if distance < m
+                                   points_of_shape = []
+                                   points_of_shape.append([x,y]) 
+                               end
+                               polyin = polyshape(points_of_shape);
+                        end
+    
+                    % ignore circle for now
+                    % case circle
+                    %     for [x,y] = stored_points
+                    %            distance = [x+1,y+1] - [x,y]
+                    %            if distance < m
+                    %                points_of_shape = []
+                    %                points_of_shape.append([x,y]) 
+                    %            end
+                    %            polyin = polyshape(points_of_shape);
+                    %     end
+    
+                    otherwise
+                        printf("This ain't a shape!");
+                end
             end
 
             objects = [];
