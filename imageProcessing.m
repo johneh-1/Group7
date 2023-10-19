@@ -22,7 +22,96 @@ classdef imageProcessing < handle
                 % [IN] img = grayscale image
                 % [OUT] objects = array of objects
             % From Alex
+            points = detectHarrisFeatures(img,"MinQuality",0.1);
+
+            % n = ??? Value that seperates reference image from whole image
+
+            image_type = type;
+
+            switch type
+                case reference_image
+                    stored_points = points.Location;
+                case current_image
+                    stored_points = points.Location;
+                    for stored_points(:,1) < n       %set defined value;
+                        stored_points(:,[n:end,n:end])=[];
+                    end
+                otherwise
+                    printf('Error: what image is this?')
+            end
+            
+            % Determine shapes by finding points close to each other
+            
+
+            % m = ??? Distance between each point
+
+            for shape = square, rectangle, diamond, triangle
+                switch shape
+                    case square
+                        for [x,y] = stored_points
+                               distance = [x+1,y+1] - [x,y]
+                               if distance < m
+                                   points_of_shape = []
+                                   points_of_shape.append([x,y]) 
+                               end
+                               polyin = polyshape(points_of_shape);
+                        end
+    
+                    case rectangle
+                        for [x,y] = stored_points
+                               distance = [x+1,y+1] - [x,y]
+                               if distance < m
+                                   points_of_shape = []
+                                   points_of_shape.append([x,y]) 
+                               end
+                               polyin = polyshape(points_of_shape);
+                        end
+    
+                    case diamond
+                        for [x,y] = stored_points
+                               distance = [x+1,y+1] - [x,y]
+                               if distance < m
+                                   points_of_shape = []
+                                   points_of_shape.append([x,y]) 
+                               end
+                               polyin = polyshape(points_of_shape);
+                        end
+    
+                    case triangle
+                        for [x,y] = stored_points
+                               distance = [x+1,y+1] - [x,y]
+                               if distance < m
+                                   points_of_shape = []
+                                   points_of_shape.append([x,y]) 
+                               end
+                               polyin = polyshape(points_of_shape);
+                        end
+    
+                    % ignore circle for now
+                    % case circle
+                    %     for [x,y] = stored_points
+                    %            distance = [x+1,y+1] - [x,y]
+                    %            if distance < m
+                    %                points_of_shape = []
+                    %                points_of_shape.append([x,y]) 
+                    %            end
+                    %            polyin = polyshape(points_of_shape);
+                    %     end
+    
+                    otherwise
+                        printf("This ain't a shape!");
+                end
+            end
+
             objects = [];
+
+            % Deterine centre point of shape
+            for shape in object             
+                [x,y] = centroid(polyin);
+                objects.append([x,y]);
+            end
+
+            objects;
         end
 
         function [matchedPoints,matchedPointsReference] = MatchFeatures(img,reference)
