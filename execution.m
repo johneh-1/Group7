@@ -76,16 +76,19 @@ for i=1:size(objects,1)
     theta = imageProcessing.CalcTransform(matchedPoints,matchedPointsReference);
 
     % Identify the starting location of the piece
-    [xC,yC] = objects(i,:);
-    % Brayden's conversion function for xC,yC into distances
+    [u,v] = objects(i,:);
     pointMsg = pointsSub.LatestMessage;
     pointMsg.PreserveStructureOnRead = true;
     depthPoints = readXYZ(pointMsg);
     zPoints = depthPoints(:,:,3);
-    z = zPoints(320,:);
-    sumZ = sum(z);
-    sizeZ = size(z,2);
-    zC = sumZ/sizeZ;
+    % z = zPoints(320,:);
+    % sumZ = sum(z);
+    % sizeZ = size(z,2);
+    % zC = sumZ/sizeZ;
+        % Extract the z value for the coordinate
+    zC = zPoints(u,v);
+        % Convert the coordinates into centimetres from pixels
+    [xC,yC] = camera2Dobot.PixelToDistance(u,v,zC);
     [xD,yD,zD] = camera2Dobot.Convert(xC,yC,zC);
 
     % Move and collect piece
@@ -102,16 +105,19 @@ for i=1:size(objects,1)
     pause(1);
 
     % Identify the target location of the piece
-    [xCT,yCT] = targets(i,:);
-    % Brayden's conversion function for xC,yC into distances
+    [uT,vT] = targets(i,:);
     pointMsgT = pointsSub.LatestMessage;
     pointMsgT.PreserveStructureOnRead = true;
     depthPointsT = readXYZ(pointMsgT);
     zPointsT = depthPointsT(:,:,3);
-    zCT = zPointsT(boxX,boxY);
-    % sumZT = sum(zT);
-    % sizeZT = size(zT,2);
-    % zCT = sumZT/sizeZT;
+    % % zCT = zPointsT(boxX,boxY);
+    % % sumZT = sum(zT);
+    % % sizeZT = size(zT,2);
+    % % zCT = sumZT/sizeZT;
+        % Extract the z value for the coordinate
+    zCT = zPointsT(uT,vT);
+        % Convert the coordinates into centimetres from pixels
+    [xCT,yCT] = camera2Dobot.PixelToDistance(uT,vT,zCT);
     [xDT,yDT,zDT] = camera2Dobot.Convert(xCT,yCT,zCT);
 
     % Move and deposit piece
