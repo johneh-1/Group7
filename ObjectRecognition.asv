@@ -13,7 +13,7 @@ base_corner_locations = points1.Location;
 
 
 % Number of points
-% numPoints = size(base_corner_locations, 1);
+numPoints = size(base_corner_locations, 1);
 
 % Iterate through the points and calculate distances
 % for i = 1:numPoints
@@ -24,15 +24,21 @@ base_corner_locations = points1.Location;
 %     end
 % end
 
-
+% Define the array of points along with their coordinates
+pointData = {
+    [128.5518, 26.5558];
+    [128.5422, 146.5232];
+    [128.6103, 154.9101];
+    [128.8029, 173.5503];
+};
 
 % Calculate distances and display them
-numPoints = size(base_corner_locations,1);
+numPoints = numel(base_corner_locations);
 
 for i = 1:numPoints
     for j = i+1:numPoints
-        point1 = base_corner_locations(i,:);
-        point2 = base_corner_locations(j,:);
+        point1 = points1{i};
+        point2 = pointData{j};
         
         % Calculate the Euclidean distance between point1 and point2
         distance = norm(point1 - point2);

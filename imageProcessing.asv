@@ -58,7 +58,7 @@ classdef imageProcessing < handle
                                 distance = norm(points(i, :) - points(j, :));
                             end
                         end
-                       if distance < d 
+                       if distance < m
                            points_of_shape = []
                            points_of_shape.append([x,y]) 
                        end
