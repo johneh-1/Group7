@@ -22,6 +22,8 @@ classdef imageProcessing < handle
                 % [IN] img = grayscale image
                 % [OUT] objects = array of objects
             % From Alex
+            img = imread("workspaceSampleImage.jpg");
+            img = rgb2gray(img);
             points = detectHarrisFeatures(img,"MinQuality",0.1);
 
             % n = ??? Value that seperates reference image from whole image
@@ -106,7 +108,7 @@ classdef imageProcessing < handle
             objects = [];
 
             % Deterine centre point of shape
-            for shape in object             
+            for centre = shape             
                 [x,y] = centroid(polyin);
                 objects.append([x,y]);
             end
