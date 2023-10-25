@@ -1,17 +1,7 @@
 classdef DoBotControl
-    % DOBOTCONTROL Class to control movement of the manipulator
-    
-    properties (Constant)
-        % jointStateSubscriber = rossubscriber('/dobot/state');               % Subscriber to joint states of robot
-        % jointService = rossvcclient('/dobot/joint_angles');                 % Service to control joint angles of robot
-        % cartService = rossvcclient('/dobot/cartesian');                     % Service to control Cartesian coordinates of robot
-    end
-
-    properties (Access = public)
-        % jointSubStatus = 0;                                                 % Status of joint state subscriber intialisation
-        % jointSrvStatus = 0;                                                 % Status of joint state service initialisation
-        % cartSrvStatus = 0;                                                  % Status of Cartesian service initialisation
-    end
+    % DOBOTCONTROL Class to control movement of the DoBot Magician
+    % Functions enable movement control using either joint states or
+    % Cartesian coordinates
     
     methods
         function self = DoBotControl()
@@ -40,7 +30,7 @@ classdef DoBotControl
             ee = currentJointState(4);
 
             % Print to terminal
-            fprintf('Current joint states are [%d,%d,%d,%d]',base,rearArm,foreArm,ee);
+            fprintf('Current joint states are [%d,%d,%d,%d]\n',base,rearArm,foreArm,ee);
         end
         
         function [x,y,z] = GetCart()
@@ -108,11 +98,6 @@ classdef DoBotControl
             % Based on the total rotation required and the value of
             % rotation achieved by the base, with consideration of initial
             % joint state
-            
-            % Load values from inputs |||| Not needed??? Duplication???
-            % startPos = [x0,y0,z0];                                          % Starting position (collection point)
-            % endPos = [x1,y1,z1];                                            % Target position (deposition point)
-            % startJs = [base0,rear0,fore0,ee0];                              % Starting joint state (collection point)
 
             % Calculate radius of startPos
             startRad = sqrt(startPos(1)^2 + startPos(2)^2);

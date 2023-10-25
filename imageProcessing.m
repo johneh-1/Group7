@@ -1,15 +1,10 @@
 classdef imageProcessing < handle
-    %IMAGEPROCESSING Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties (Constant)
-        % Property1
-    end
+    % IMAGEPROCESSING Image processing class for analysis
+    % Processing of images received from RGB-D sensor
     
     methods
         function self = imageProcessing()
-            %IMAGEPROCESSING Construct an instance of this class
-            %   Detailed explanation goes here
+            % IMAGEPROCESSING Define all functions for the class
             self.ObjectRecognition(img);
             self.MatchFeatures(img,reference);
             self.CalcTransform(matchedPoints,matchedPointsReference);
@@ -21,7 +16,6 @@ classdef imageProcessing < handle
             % Parameters:
                 % [IN] img = grayscale image
                 % [OUT] objects = array of objects
-            % From Alex
             img = imread("workspaceSampleImage.jpg");
             img = rgb2gray(img);
             points = detectHarrisFeatures(img,"MinQuality",0.01);

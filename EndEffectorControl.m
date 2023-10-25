@@ -1,13 +1,6 @@
 classdef EndEffectorControl
     % ENDEFFECTORCONTROL Class to control end effector suction
-    
-    properties (Constant)
-        % eeService = rossvcclient('/dobot/ee_ctrl');                         % Service to control end effector suction
-    end
-
-    properties
-        % eeSrvStatus = 0;                                                    % Status of end effector service initialisation
-    end
+    % This class controls the suction for the suction end effector.
     
     methods
         function self = EndEffectorControl()

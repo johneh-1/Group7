@@ -1,6 +1,6 @@
 classdef camera2Dobot < handle
-    % CAMERA2DOBOT Convert from camera coordinate frame to DoBot
-    %   Detailed explanation goes here
+    % CAMERA2DOBOT Convert from camera coordinate frame to DoBot frame
+    % Class containing calculation functions.
     
     properties (Constant)
         % Properties of camera (Intel RealSense D435i, mounted 330mm above
@@ -20,53 +20,52 @@ classdef camera2Dobot < handle
     end
 
     properties (Access = public)
-        % Other properties
+        % Allocate and array of points for /clicked_point
         % point = [];
     end
     
     methods
         function self = camera2Dobot()
             % CAMERA2DOBOT Define all functions required in the class
-            %   Detailed explanation goes here
-            % % self.GetCameraPoint(point);
+            % self.GetCameraPoint(point);
             self.PixelToDistance(u,v,z);
             self.Convert(x,y,z);
         end
     end
 
     methods (Static) 
-        % % function [xC,yC,zC] = GetCameraPoint(point)
-        % %     % GETCAMERAPOINT Function to get the coordinates of a point in
-        % %     % the camera's frame
-        % %     % Points are either determined via subscription to a ROS topic
-        % %     % that outputs the coordinates of a point clicked in the
-        % %     % environment OR via a centrepoint output by an object
-        % %     % detection function
-        % %     % Parameters:
-        % %         % [IN] type = (1) clicked point OR (2) detected object
-        % %         % [OUT] xC = x-coordinate in camera's frame
-        % %         % [OUT] yC = y-coordinate in camera's frame
-        % %         % [OUT] zC = z-coordinate in camera's frame
-        % % 
-        % %     switch type
-        % %         case 1
-        % %             % Clicked point
-        % %             % Subscribe to /clicked_point topic
-        % %             pointSub = rossubscriber('/clicked_point');
-        % % 
-        % %             % Extract values from topic
-        % %             point = pointSub.LatestMessage.Point;
-        % %             xC = point.X;
-        % %             yC = point.Y;
-        % %             zC = point.Z;
-        % % 
-        % %             % pointSub = rossubscriber('/clicked_point',camera2Dobot.pointCallback);
-        % %         case 2
-        % %             % Detected object
-        % %             % Get object coordinates
-        % %                 % From function developed by Alex
-        % %     end
-        % % end
+        % function [xC,yC,zC] = GetCameraPoint(point)
+        %     % GETCAMERAPOINT Function to get the coordinates of a point in
+        %     % the camera's frame
+        %     % Points are either determined via subscription to a ROS topic
+        %     % that outputs the coordinates of a point clicked in the
+        %     % environment OR via a centrepoint output by an object
+        %     % detection function
+        %     % Parameters:
+        %         % [IN] type = (1) clicked point OR (2) detected object
+        %         % [OUT] xC = x-coordinate in camera's frame
+        %         % [OUT] yC = y-coordinate in camera's frame
+        %         % [OUT] zC = z-coordinate in camera's frame
+        % 
+        %     switch type
+        %         case 1
+        %             % Clicked point
+        %             % Subscribe to /clicked_point topic
+        %             pointSub = rossubscriber('/clicked_point');
+        % 
+        %             % Extract values from topic
+        %             point = pointSub.LatestMessage.Point;
+        %             xC = point.X;
+        %             yC = point.Y;
+        %             zC = point.Z;
+        % 
+        %             % pointSub = rossubscriber('/clicked_point',camera2Dobot.pointCallback);
+        %         case 2
+        %             % Detected object
+        %             % Get object coordinates
+        %             objects = imageProcessing.ObjectRecognition(img);
+        %     end
+        % end
 
         function [x,y] = PixelToDistance(u,v,z)
             % PIXELTODISTANCE
@@ -93,13 +92,13 @@ classdef camera2Dobot < handle
                 % [OUT] zD = z-coordinate in DoBot's frame
 
            % Convert to get x-coordinate
-           xD = (zC)/1000 + camera2Dobot.cameraXOffset;
+           xD = (zC) + camera2Dobot.cameraXOffset;
 
            % Convert to get y-coordinate
-           yD = -1*((yC)/1000 + camera2Dobot.cameraYOffset);
+           yD = -1*((yC) + camera2Dobot.cameraYOffset);
 
            % Convert to get z-coordinate
-           zD = (xC)/1000 + camera2Dobot.cameraVertOffset + camera2Dobot.eeLength;
+           zD = (xC) + camera2Dobot.cameraVertOffset + camera2Dobot.eeLength;
         end
     end
 end
