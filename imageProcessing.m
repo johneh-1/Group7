@@ -20,6 +20,7 @@ classdef imageProcessing < handle
             % IMAGEPROCESSING Define all functions for the class
             self.ObjectRecognition(img);
             self.TwoObjects(img);
+            self.DetectCube(img);
             self.MatchFeatures(img,reference);
             self.CalcTransform(matchedPoints,matchedPointsReference);
         end
@@ -131,7 +132,7 @@ classdef imageProcessing < handle
         % % end
 
         function objects = TwoObjects(img)
-            % OBJECTRECOGNITION Description
+            % TWOOBJECTS Description
             % Parameters:
                 % [IN] img = grayscale image
                 % [OUT] objects = array of objects
@@ -220,6 +221,56 @@ classdef imageProcessing < handle
             % %         shape1(end+1) = i;
             % %     end
             % % end
+        end
+
+        function objects = DetectCube(img)
+            % TWOOBJECTS Description
+            % Parameters:
+                % [IN] img = grayscale image
+                % [OUT] objects = array of objects
+
+            divideX = 200;
+            divideY = 230;
+            
+            % Extract corners using Harris Features
+            corners = detectHarrisFeatures(img,"MinQuality",0.08);
+
+            rectangle = [];                                                 % Rectangle on LHS of divide
+            target = [];
+
+            for i = 1:size(corners.Location,1)
+                if corners.Location(i,1) > divideX && corners.Location(i,2) > divideY
+                    rectangle(end+1) = i;
+                end
+                if corners.Location(i,1) > divideX && corners.Location(i,2) < divideY
+                    target(end+1) = i;
+                end
+            end
+
+            rectangleX = [];
+            rectangleY = [];
+
+            for i = 1:size(rectangle,2)
+                rectangleX(end+1) = corners.Location(rectangle(i),1)
+                rectangleY(end+1) = corners.Location(rectangle(i),2)
+            end
+
+            rectangleU = sum(rectangleX)/size(rectangleX,2)
+            rectangleV = sum(rectangleY)/size(rectangleY,2);
+
+            targetX = [];
+            targetY = [];
+
+            for i = 1:size(target,2)
+                targetX(end+1) = corners.Location(target(i),1)
+                targetY(end+1) = corners.Location(target(i),2)
+            end
+
+            targetU = sum(targetX)/size(targetX,2);
+            targetV = sum(targetY)/size(targetY,2);
+
+            objects = [rectangleU,rectangleV,targetU,targetV];
+
         end
 
         function [matchedPoints,matchedPointsReference] = MatchFeatures(img,reference)

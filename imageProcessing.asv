@@ -20,6 +20,7 @@ classdef imageProcessing < handle
             % IMAGEPROCESSING Define all functions for the class
             self.ObjectRecognition(img);
             self.TwoObjects(img);
+            self.DetectCube(img);
             self.MatchFeatures(img,reference);
             self.CalcTransform(matchedPoints,matchedPointsReference);
         end
@@ -131,7 +132,7 @@ classdef imageProcessing < handle
         % % end
 
         function objects = TwoObjects(img)
-            % OBJECTRECOGNITION Description
+            % TWOOBJECTS Description
             % Parameters:
                 % [IN] img = grayscale image
                 % [OUT] objects = array of objects
@@ -174,13 +175,26 @@ classdef imageProcessing < handle
             end
 
             % Calculate centroid of rectangle
-            rectangleU;
-            rectangleV;
-            for i =
+            rectangleX = [];
+            rectangleY = [];
+            for i = 1:size(rectangle)
+                rectangleX(end+1) = corners.Location(i,1);
+                rectangleY(end+1) = corners.Location(i,2);
+            end
+
+            rectangleU = sum(rectangleX)/size(rectangleX);
+            rectangleV = sum(rectangleY)/size(rectangleY);
 
             % Calculate centroid of triangle
-            triangleU;
-            triangleV;
+            triangleX = [];
+            triangleY = [];
+            for i = 1:size(rectangle)
+                triangleX(end+1) = corners.Location(i,1);
+                triangleY(end+1) = corners.Location(i,2);
+            end
+
+            triangleU = sum(triangleX)/size(triangleX);
+            triangleV = sum(triangleY)/size(triangleY);
 
             % Allocate objects as a 2x2 matrix
                 % Row 1: Coordinates of triangle
@@ -207,6 +221,48 @@ classdef imageProcessing < handle
             % %         shape1(end+1) = i;
             % %     end
             % % end
+        end
+
+        function objects = DetectCube(img)
+            % TWOOBJECTS Description
+            % Parameters:
+                % [IN] img = grayscale image
+                % [OUT] objects = array of objects
+
+            divideX = 300;
+            divideY = 220;
+            
+            % Extract corners using Harris Features
+            corners = detectHarrisFeatures(img,"MinQuality",0.08);
+
+            rectangle = [];                                                 % Rectangle on LHS of divide
+            % % 
+            % % for i = 1:size(sides)-1
+            % %     if corners.Location(sides(i),1) > imageProcessing.divide
+            % %         rectangle(end+1) = sides(i);
+            % %     end
+            % % end
+
+            for i = 1:size(corners.Location,1)
+                if corners.Location(i,1) > divideX && corners.Location(i,1) > divideY
+                    rectangle(end+1) = i;
+                elseif
+                end
+            end
+
+            rectangleX = [];
+            rectangleY = [];
+
+            for i = 1:size(rectangle)
+                rectangleX(end+1) = corners.Location(rectangle(i),1);
+                rectangleY(end+1) = corners.Location(rectangle(i),2);
+            end
+
+            rectangleU = sum(rectangleX)/size(rectangleX);
+            rectangleV = sum(rectangleY)/size(rectangleY);
+
+            object = [rectangleU,rectangleV];
+
         end
 
         function [matchedPoints,matchedPointsReference] = MatchFeatures(img,reference)
