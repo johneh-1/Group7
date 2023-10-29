@@ -67,12 +67,16 @@ classdef camera2Dobot < handle
         %     end
         % end
 
-        function [x,y] = PixelToDistance(u,v,z)
+        function [x,y] = PixelToDistance(u,v,f)
             % PIXELTODISTANCE
             % Note @Brayden, access properties via
-                camera2Dobot.px;
-                camera2Dobot.py;
-                camera2Dobot.f;
+               u =  camera2Dobot.px;
+               v = camera2Dobot.py;
+               f = camera2Dobot.f;
+
+               x = (u - principalPoint(1)) * z / f;
+                
+               y = (v - principalPoint(2)) * z / f;     
         end
 
         function [xD,yD,zD] = Convert(xC,yC,zC)
