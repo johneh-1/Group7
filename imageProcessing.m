@@ -229,11 +229,11 @@ classdef imageProcessing < handle
                 % [IN] img = grayscale image
                 % [OUT] objects = array of objects
 
-            divideX = 200;
+            divideX = 280;
             divideY = 230;
             
             % Extract corners using Harris Features
-            corners = detectHarrisFeatures(img,"MinQuality",0.08);
+            corners = detectHarrisFeatures(img,"MinQuality",0.07);
 
             rectangle = [];                                                 % Rectangle on LHS of divide
             target = [];

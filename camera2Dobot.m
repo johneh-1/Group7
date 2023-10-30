@@ -5,17 +5,18 @@ classdef camera2Dobot < handle
     properties (Constant)
         % Properties of camera (Intel RealSense D435i, mounted 330mm above
         % desk)
-        cameraVertOffset = 0.325;                                           % Mounted 325mm (0.325m) above desk
-        cameraXOffset = 0.130;                                              % Mounted 130mm (0.130m) along x-axis of DoBot frame
-        cameraYOffset = -0.215;                                             % Mounted 200mm (0.200m) along y-axis of DoBot frame
+        cameraVertOffset = 0.315;                                           % Mounted 325mm (0.325m) above desk
+        cameraXOffset = 0.00;                                              % Mounted 130mm (0.130m) along x-axis of DoBot frame
+        cameraYOffset = -0.23;                                             % Mounted 200mm (0.200m) along y-axis of DoBot frame
+        dobotZOffset = 0.145;
 
         % Properties of DoBot
         doBotVertOffset = -0.0693;                                          % End of suction end effector sits 69.3mm (0.0693m) below DoBot vertical 0 when flat on desk
 
         % Camera intrinsic properties (from calibration)
-        pX = 0;                                                             % Principal point offset (x)
-        pY = 0;                                                             % Principal point offset (y)
-        f = 0;                                                              % Focal length
+        pX = 453;                                                             % Principal point offset (x)
+        pY = 344;                                                             % Principal point offset (y)
+        f = 411;                                                              % Focal length
 
     end
 
@@ -74,9 +75,10 @@ classdef camera2Dobot < handle
                % camera2Dobot.py;
                % camera2Dobot.f;
 
-               x = (u - camera2Dobot.px) * z / camera2Dobot.f;
+               x = (u - camera2Dobot.pX) * z / camera2Dobot.f;
                 
-               y = (v - camera2Dobot.py) * z / camera2Dobot.f;     
+               % v = 480-v;
+               y = (v - camera2Dobot.pY) * z / camera2Dobot.f;
         end
 
         function [xD,yD,zD] = Convert(xC,yC,zC)
@@ -95,14 +97,24 @@ classdef camera2Dobot < handle
                 % [OUT] yD = y-coordinate in DoBot's frame
                 % [OUT] zD = z-coordinate in DoBot's frame
 
+           % % % Convert to get x-coordinate
+           % % xD = (zC) + camera2Dobot.cameraXOffset;
+           % % 
+           % % % Convert to get y-coordinate
+           % % yD = -1*((yC) + camera2Dobot.cameraYOffset);
+           % % 
+           % % % Convert to get z-coordinate
+           % % zD = (xC) + camera2Dobot.cameraVertOffset + camera2Dobot.eeLength;
+
            % Convert to get x-coordinate
-           xD = (zC) + camera2Dobot.cameraXOffset;
+           xD = -1*((yC)) + camera2Dobot.cameraXOffset;
 
            % Convert to get y-coordinate
-           yD = -1*((yC) + camera2Dobot.cameraYOffset);
+           yD = 1*((xC) + camera2Dobot.cameraYOffset); % removed -1
 
            % Convert to get z-coordinate
-           zD = (xC) + camera2Dobot.cameraVertOffset + camera2Dobot.eeLength;
+           % zD = (zC) - camera2Dobot.cameraVertOffset - camera2Dobot.doBotVertOffset;
+           zD = -0.05;
         end
     end
 end
