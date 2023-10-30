@@ -57,60 +57,56 @@ zPoints = depthPoints(:,:,3);
 zC = zPoints(round(u),round(v));
 
 % Convert the coordinates into metres from pixels
-[xC,yC] = camera2Dobot.PixelToDistance(round(u),round(v),zC);
+[xC,yC] = camera2Dobot.PixelToDistance(round(objects(1,1)),round(objects(1,2)),zC);
 [xD,yD,zD] = camera2Dobot.Convert(xC,yC,zC);
 
 % Move and collect piece
-    % Waypoint to avoid collision with DoBot base
 DoBotControl.MoveCart(0.13,-0.15,0,0,0,0);
 pause(1);
-    % Move to 25mm (0.025m) above piece to avoid knocking it
 DoBotControl.MoveCart(xD,yD,zD+0.025,0,0,0);
 pause(1);
-    % Lower end effector to top of piece
 DoBotControl.MoveCart(xD,yD,zD,0,0,0);
 pause(1);
-    % Turn on suction
 EndEffectorControl.On();
 pause(1);
-    % Get joint state
+% Get joint state
 [base,rearArm,foreArm,ee] = DoBotControl.GetJointState();
 pause(1);
-    % Move to 25mm (0.025m) above piece to avoid knocking it
 DoBotControl.MoveCart(xD,yD,zD+0.025,0,0,0);
 pause(1);
 
 % Identify the target location of the piece
-uT = objects(1,3);
-vT = objects(1,4);
+[uT,vT] = [objects(3),objects(4)];
 pointMsgT = pointsSub.LatestMessage;
 pointMsgT.PreserveStructureOnRead = true;
 depthPointsT = readXYZ(pointMsgT);
 zPointsT = depthPointsT(:,:,3);
 
-% Extract the z value for the target coordinate
-zCT = zPointsT(round(uT),round(vT));
-% Convert the coordinates into centimetres from pixels
-[xCT,yCT] = camera2Dobot.PixelToDistance(round(uT),round(vT),zCT);
-[xDT,yDT,zDT] = camera2Dobot.Convert(xCT,yCT,zCT);
+    % Extract the z value for the coordinate
+zCT = zPointsT(round(objects(1,3)),round(objects(1,4)));
+    % Convert the coordinates into centimetres from pixels
+% [xCT,yCT] = camera2Dobot.PixelToDistance(round(objects(3)),round(objects(4)),zCT);
+% [xDT,yDT,zDT] = camera2Dobot.Convert(xCT,yCT,zCT);
+[xC,yC] = camera2Dobot.PixelToDistance(round(objects(1,3)),round(objects(1,4)),zC);
+[xD,yD,zD] = camera2Dobot.Convert(xC,yC,zC);
 
 % Move and deposit piece
-    % Move to 25mm (0.025m) above target to avoid knocking it with piece
-DoBotControl.MoveCart(xDT,yDT,zDT+0.02+0.025,0,0,0);
+    % Move to 25mm above target
+% DoBotControl.MoveCart(xDT,yDT,zDT+0.02+0.025,0,0,0);
+DoBotControl.MoveCart(xD-0.06,yD,zD+0.02+0.025,0,0,0);
 pause(1);
-    % Calculate alignment of piece
-eeT = DoBotControl.CalcEEReqRot([xD,yD,zD],[base,rearArm,foreArm,ee],[xDT,yDT,zDT],theta);
-[base,rearArm,foreArm,ee] = DoBotControl.GetJointState();
-pause(1);
-    % Rotate end effector to align piece to target
-DoBotControl.RotateEndEffector(base,rearArm,foreArm,eeT);
-pause(1);
+% %     % Calculate alignment of piece
+% % eeT = DoBotControl.CalcEEReqRot([xD,yD,zD],[base,rearArm,foreArm,ee],[xDT,yDT,zDT],theta);
+% % [base,rearArm,foreArm,ee] = DoBotControl.GetJointState();
+% % pause(1);
+% %     % Rotate end effector to align piece to target
+% % DoBotControl.RotateEndEffector(base,rearArm,foreArm,eeT);
+% % pause(1);
     % Place piece
-DoBotControl.MoveCart(xDT,yDT,zDT+0.02,0,0,0);
+DoBotControl.MoveCart(xD-0.06,yD,zD+0.02,0,0,0);
 pause(1);
-    % Turn off suction
 EndEffectorControl.Off();
 pause(1);
-    % Move to 25mm (0.025m) above target to avoid knocking it or the piece
-DoBotControl.MoveCart(xDT,yDT,zDT+0.02+0.025,0,0,0);
+    % Move to 25mm above target
+DoBotControl.MoveCart(xD-0.06,yD,zD+0.02+0.025,0,0,0);
 pause(1);
